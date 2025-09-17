@@ -3,6 +3,7 @@ package uz.nonvoyxona.app.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static uz.nonvoyxona.app.model.OrderState.NOT_READY;
@@ -25,6 +26,7 @@ public class Order {
     @ManyToOne
     @JoinColumn(name = "courier_id")
     private Courier courier;
+    @Builder.Default
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderItem> items;
+    private List<OrderItem> items = new ArrayList<>();
 }

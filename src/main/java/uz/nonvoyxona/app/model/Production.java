@@ -5,7 +5,7 @@ import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @ToString
 @Getter
@@ -31,5 +31,5 @@ public class Production {
     private int quantity;
     @CreatedDate
     @Column(updatable = false)
-    private LocalDate productionDate;
+    private LocalDateTime productionDateTime;
 }

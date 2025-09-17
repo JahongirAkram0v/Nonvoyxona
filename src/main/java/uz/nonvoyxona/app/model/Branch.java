@@ -15,6 +15,7 @@ import java.util.List;
 public class Branch {
 
     @Id
+    @GeneratedValue
     private int id;
     private String name;
     private String address;

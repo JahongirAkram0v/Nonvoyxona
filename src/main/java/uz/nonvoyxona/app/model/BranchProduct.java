@@ -1,10 +1,9 @@
 package uz.nonvoyxona.app.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 
 @ToString
 @Getter
@@ -26,4 +25,7 @@ public class BranchProduct {
     private Product product;
 
     private int quantity;
+
+    @OneToMany(mappedBy = "branchProduct")
+    private List<OrderItem> orderItems;
 }

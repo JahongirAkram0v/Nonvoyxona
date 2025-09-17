@@ -24,7 +24,5 @@ public class Product {
     private List<BranchProduct> branchProducts;
     @OneToMany(mappedBy = "product")
     private List<Production> productions;
-    @OneToMany(mappedBy = "product")
-    private List<OrderItem> orderItems;
 
 }
