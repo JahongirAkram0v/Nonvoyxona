@@ -1,11 +1,9 @@
 package uz.nonvoyxona.app.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static uz.nonvoyxona.app.model.CourierState.OFFLINE;
@@ -27,6 +25,7 @@ public class Courier {
     @Builder.Default
     private CourierState courierState = OFFLINE;
 
-    @OneToMany(mappedBy = "courier")
-    private List<Order> orders;
+    @Builder.Default
+    @OneToMany(mappedBy = "courier", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Order> orders = new ArrayList<>();
 }

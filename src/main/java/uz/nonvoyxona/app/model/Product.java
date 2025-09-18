@@ -3,6 +3,7 @@ package uz.nonvoyxona.app.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @ToString
@@ -20,9 +21,11 @@ public class Product {
     private String name;
     private int price;
 
-    @OneToMany(mappedBy = "product")
-    private List<BranchProduct> branchProducts;
-    @OneToMany(mappedBy = "product")
-    private List<Production> productions;
+    @Builder.Default
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BranchProduct> branchProducts = new ArrayList<>();
+    @Builder.Default
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Production> productions = new ArrayList<>();
 
 }

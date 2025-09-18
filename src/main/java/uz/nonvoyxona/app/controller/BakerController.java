@@ -17,33 +17,33 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class BakerController {
 
-    private final BakerService bakerService;
-    private final BranchService branchService;
-
-    //ADMIN ROLE
-    @PostMapping
-    public ResponseEntity<Void> create(@RequestBody BakerDTO bakerDTO) {
-
-        Optional<Branch> optionalBranch = branchService.findById(bakerDTO.getBranchId());
-        if (optionalBranch.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        bakerService.create(bakerDTO, optionalBranch.get());
-        return ResponseEntity.ok().build();
-    }
-
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Baker> findById(@PathVariable Integer id) {
-        Optional<Baker> optionalBaker = bakerService.findById(id);
-        return optionalBaker
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    @GetMapping
-    public List<Baker> findAll() {
-        return bakerService.findAll();
-    }
+//    private final BakerService bakerService;
+//    private final BranchService branchService;
+//
+//    //ADMIN ROLE
+//    @PostMapping
+//    public ResponseEntity<Void> create(@RequestBody BakerDTO bakerDTO) {
+//
+//        Optional<Branch> optionalBranch = branchService.findById(bakerDTO.getBranchId());
+//        if (optionalBranch.isEmpty()) {
+//            return ResponseEntity.badRequest().build();
+//        }
+//
+//        bakerService.create(bakerDTO, optionalBranch.get());
+//        return ResponseEntity.ok().build();
+//    }
+//
+//    //ADMIN ROLE
+//    @GetMapping("/{id}")
+//    public ResponseEntity<Baker> findById(@PathVariable Integer id) {
+//        Optional<Baker> optionalBaker = bakerService.findById(id);
+//        return optionalBaker
+//                .map(ResponseEntity::ok)
+//                .orElseGet(() -> ResponseEntity.notFound().build());
+//    }
+//
+//    @GetMapping
+//    public List<Baker> findAll() {
+//        return bakerService.findAll();
+//    }
 }

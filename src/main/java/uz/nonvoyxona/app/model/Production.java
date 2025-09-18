@@ -29,7 +29,7 @@ public class Production {
     private Product product;
 
     private int quantity;
+    //togirlashim kerak
     @CreatedDate
-    @Column(updatable = false)
     private LocalDateTime productionDateTime;
 }

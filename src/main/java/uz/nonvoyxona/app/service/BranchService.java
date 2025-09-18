@@ -14,15 +14,32 @@ public class BranchService {
 
     private final BranchRepo branchRepo;
 
-    public void create(Branch branch) {
+    public void save(Branch branch) {
         branchRepo.save(branch);
+    }
+
+    public Optional<Branch> findById(Integer id) {
+        return branchRepo.findById(id);
     }
 
     public List<Branch> findAll(){
         return branchRepo.findAll();
     }
 
-    public Optional<Branch> findById(Integer id) {
-        return branchRepo.findById(id);
+    public List<Integer> findAllIds() {
+        return branchRepo.findAllIds();
     }
+
+    public List<Branch> findAllWithBranchProducts() {
+        return branchRepo.findAllWithBranchProducts();
+    }
+
+    public List<Branch> findAllWithBakers() {
+        return branchRepo.findAllWithBakers();
+    }
+
+    public List<Branch> findAllWithBranchProductsAndBakers() {
+        return branchRepo.findAllWithBranchProductsAndBakers();
+    }
+
 }

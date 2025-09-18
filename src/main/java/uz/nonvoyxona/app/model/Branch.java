@@ -3,9 +3,9 @@ package uz.nonvoyxona.app.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
-@ToString
 @Getter
 @Setter
 @Builder
@@ -17,15 +17,17 @@ public class Branch {
     @Id
     @GeneratedValue
     private int id;
+    private String username;
+    private String password;
     private String name;
-    private String address;
-    private String phoneNumber;
 
-    @OneToMany(mappedBy = "branch")
-    private List<BranchProduct> branchProducts;
+    @Builder.Default
+    @OneToMany(mappedBy = "branch", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderColumn(name = "branchProduct_index")
+    private List<BranchProduct> branchProducts = new ArrayList<>();
 
-    @OneToMany(mappedBy = "branch")
-    private List<Baker> bakers;
-
-
+    @Builder.Default
+    @OneToMany(mappedBy = "branch", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderColumn(name = "baker_index")
+    private List<Baker> bakers = new ArrayList<>();
 }

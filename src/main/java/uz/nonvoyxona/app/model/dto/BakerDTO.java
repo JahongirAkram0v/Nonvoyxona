@@ -7,6 +7,6 @@ import lombok.Setter;
 @Setter
 public class BakerDTO {
 
-    private String name;
     private Integer branchId;
+    private String name;
 }

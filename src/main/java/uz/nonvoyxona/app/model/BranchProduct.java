@@ -3,9 +3,9 @@ package uz.nonvoyxona.app.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
-@ToString
 @Getter
 @Setter
 @Builder
@@ -24,8 +24,11 @@ public class BranchProduct {
     @ManyToOne
     private Product product;
 
-    private int quantity;
+    @Builder.Default
+    private int quantity = 0;
 
-    @OneToMany(mappedBy = "branchProduct")
-    private List<OrderItem> orderItems;
+    @Builder.Default
+    @OneToMany(mappedBy = "branchProduct", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderColumn(name = "baker_index")
+    private List<OrderItem> orderItems =  new ArrayList<>();
 }
