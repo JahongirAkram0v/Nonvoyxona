@@ -10,7 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity()
-public class OrderItem {
+public class OrderItem1 {
 
     @Id
     @GeneratedValue
@@ -18,7 +18,7 @@ public class OrderItem {
 
     @ManyToOne
     @JoinColumn(name = "order_id")
-    private Order order;
+    private Order1 order1;
 
     @ManyToOne
     @JoinColumn(name = "branchProduct_id")

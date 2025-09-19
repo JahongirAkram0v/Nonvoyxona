@@ -9,9 +9,6 @@ import java.util.List;
 
 public interface BranchRepo extends JpaRepository<Branch, Integer> {
 
-    @Query("SELECT b.id FROM Branch b")
-    List<Integer> findAllIds();
-
     @EntityGraph(attributePaths = {"branchProducts"})
     @Query("SELECT b FROM Branch b")
     List<Branch> findAllWithBranchProducts();

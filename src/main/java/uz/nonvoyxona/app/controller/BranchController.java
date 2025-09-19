@@ -2,15 +2,16 @@ package uz.nonvoyxona.app.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import uz.nonvoyxona.app.model.*;
+import uz.nonvoyxona.app.model.dto.OrderDTO;
 import uz.nonvoyxona.app.model.dto.ProductionDTO;
 import uz.nonvoyxona.app.service.BakerService;
 import uz.nonvoyxona.app.service.BranchService;
 import uz.nonvoyxona.app.service.ProductService;
 import uz.nonvoyxona.app.service.ProductionService;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @RestController
@@ -23,7 +24,8 @@ public class BranchController {
     private final ProductService productService;
     private final ProductionService productionService;
 
-    public ResponseEntity<Void> createProduction(Integer branchId, ProductionDTO productionDTO) {
+    @PostMapping("/create/production")
+    public ResponseEntity<Void> createProduction(@RequestParam Integer branchId, @RequestBody ProductionDTO productionDTO) {
 
         Optional<Branch> optionalBranch = branchService.findById(branchId);
         if (optionalBranch.isEmpty()) {
@@ -32,7 +34,7 @@ public class BranchController {
         Branch branch = optionalBranch.get();
 
         Optional<Baker> optionalBaker = branch.getBakers().stream()
-                .filter(baker -> baker.getId() == (productionDTO.getBakerId()))
+                .filter(baker -> baker.getId() == productionDTO.getBakerId())
                 .findAny();
 
         Optional<Product> optionalProduct = productService.findById(productionDTO.getProductId());
@@ -47,11 +49,11 @@ public class BranchController {
         Production production = Production.builder()
                 .product(optionalProduct.get())
                 .baker(baker)
+                .productionDateTime(LocalDateTime.now())
                 .quantity(productionDTO.getQuantity())
                 .build();
         baker.getProductions().add(production);
         bakerService.save(baker);
-        productionService.save(production);
 
         Optional<BranchProduct> optionalBranchProduct = branch.getBranchProducts().stream()
                 .filter(branchProduct -> branchProduct.getProduct().getId() == product.getId())
@@ -62,6 +64,20 @@ public class BranchController {
         branchProduct.setQuantity(branchProduct.getQuantity() + productionDTO.getQuantity());
         branch.getBranchProducts().add(branchProduct);
         branchService.save(branch);
+        //adminga ham xabar berish kerak
+        //branchga ham
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/create/order")
+    public ResponseEntity<Void> crateOrder(@RequestParam Integer branchId, @RequestBody OrderDTO orderDTO){
+        Optional<Branch> optionalBranch = branchService.findById(branchId);
+        if (optionalBranch.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        Branch branch = optionalBranch.get();
+
+
 
         return ResponseEntity.ok().build();
     }

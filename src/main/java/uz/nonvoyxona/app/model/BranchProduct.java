@@ -26,9 +26,4 @@ public class BranchProduct {
 
     @Builder.Default
     private int quantity = 0;
-
-    @Builder.Default
-    @OneToMany(mappedBy = "branchProduct", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderColumn(name = "baker_index")
-    private List<OrderItem> orderItems =  new ArrayList<>();
 }

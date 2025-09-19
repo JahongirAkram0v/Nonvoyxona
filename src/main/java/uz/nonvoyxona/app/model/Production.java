@@ -19,7 +19,7 @@ public class Production {
 
     @Id
     @GeneratedValue
-    private int id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "baker_id")

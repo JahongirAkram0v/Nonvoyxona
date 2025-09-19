@@ -1,6 +1,6 @@
 package uz.nonvoyxona.app.model;
 
-public enum OrderState {
+public enum OrderState1 {
 
     NOT_READY,
     READY,

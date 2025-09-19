@@ -16,10 +16,14 @@ public class Branch {
 
     @Id
     @GeneratedValue
-    private int id;
-    private String username;
-    private String password;
+    private Long id;
+
     private String name;
+    private String address;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private Users user;
 
     @Builder.Default
     @OneToMany(mappedBy = "branch", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -30,4 +34,6 @@ public class Branch {
     @OneToMany(mappedBy = "branch", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderColumn(name = "baker_index")
     private List<Baker> bakers = new ArrayList<>();
+
+    //In-store sale ni qoshishim kerak
 }

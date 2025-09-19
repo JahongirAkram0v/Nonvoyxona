@@ -26,10 +26,6 @@ public class BranchService {
         return branchRepo.findAll();
     }
 
-    public List<Integer> findAllIds() {
-        return branchRepo.findAllIds();
-    }
-
     public List<Branch> findAllWithBranchProducts() {
         return branchRepo.findAllWithBranchProducts();
     }

@@ -2,11 +2,7 @@ package uz.nonvoyxona.app.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static uz.nonvoyxona.app.model.CourierState.OFFLINE;
+import uz.nonvoyxona.app.model.state.CourierState;
 
 @ToString
 @Getter
@@ -19,13 +15,16 @@ public class Courier {
 
     @Id
     @GeneratedValue
-    private int id;
+    private Long id;
     private String name;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private Users user;
+
     private String phoneNumber;
-    @Builder.Default
-    private CourierState courierState = OFFLINE;
 
     @Builder.Default
-    @OneToMany(mappedBy = "courier", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Order> orders = new ArrayList<>();
+    @Enumerated(EnumType.STRING)
+    private CourierState courierState = CourierState.OFFLINE;
 }

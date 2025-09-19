@@ -17,9 +17,10 @@ public class Product {
 
     @Id
     @GeneratedValue
-    private int id;
+    private Long id;
     private String name;
-    private int price;
+
+    private Long price;
 
     @Builder.Default
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)

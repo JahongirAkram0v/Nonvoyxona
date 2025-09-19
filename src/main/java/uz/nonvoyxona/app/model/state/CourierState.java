@@ -1,4 +1,4 @@
-package uz.nonvoyxona.app.model;
+package uz.nonvoyxona.app.model.state;
 
 public enum CourierState {
 
