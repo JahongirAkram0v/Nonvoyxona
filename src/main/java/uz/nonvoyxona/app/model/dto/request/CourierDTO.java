@@ -1,4 +1,4 @@
-package uz.nonvoyxona.app.model.dto;
+package uz.nonvoyxona.app.model.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import uz.nonvoyxona.app.model.*;
-import uz.nonvoyxona.app.model.dto.*;
+import uz.nonvoyxona.app.model.dto.request.*;
 import uz.nonvoyxona.app.model.state.UserRole;
 import uz.nonvoyxona.app.service.*;
 

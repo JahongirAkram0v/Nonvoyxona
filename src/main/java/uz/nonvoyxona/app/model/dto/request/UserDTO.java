@@ -1,8 +1,7 @@
-package uz.nonvoyxona.app.model.dto;
+package uz.nonvoyxona.app.model.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;
-import uz.nonvoyxona.app.model.state.UserRole;
 
 @Getter
 @Setter

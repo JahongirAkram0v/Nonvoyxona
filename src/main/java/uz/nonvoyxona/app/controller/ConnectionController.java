@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uz.nonvoyxona.app.model.User;
-import uz.nonvoyxona.app.model.dto.UserDTO;
+import uz.nonvoyxona.app.model.dto.request.UserDTO;
 import uz.nonvoyxona.app.service.UserService;
 
 import java.util.Optional;

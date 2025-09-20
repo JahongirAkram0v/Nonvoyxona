@@ -6,7 +6,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.web.bind.annotation.*;
 import uz.nonvoyxona.app.model.*;
-import uz.nonvoyxona.app.model.dto.ProductionDTO;
+import uz.nonvoyxona.app.model.dto.request.ProductionDTO;
 import uz.nonvoyxona.app.service.BakerService;
 import uz.nonvoyxona.app.service.BranchService;
 import uz.nonvoyxona.app.service.ProductService;
