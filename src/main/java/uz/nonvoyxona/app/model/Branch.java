@@ -23,7 +23,7 @@ public class Branch {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private Users user;
+    private User user;
 
     @Builder.Default
     @OneToMany(mappedBy = "branch", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)

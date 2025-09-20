@@ -9,16 +9,16 @@ import uz.nonvoyxona.app.model.state.UserRole;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity()
-public class Users {
+@Entity(name = "_user")
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     @Column(unique = true, nullable = false)
-    private String login;
+    private String username;
     @Column(nullable = false)
-    private String passwordHash;
+    private String password;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole userRole;

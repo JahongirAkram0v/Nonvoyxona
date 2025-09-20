@@ -22,7 +22,7 @@ public class BranchService {
         return branchRepo.findById(id);
     }
 
-    public List<Branch> findAll(){
+    public List<Branch> getAll(){
         return branchRepo.findAll();
     }
 

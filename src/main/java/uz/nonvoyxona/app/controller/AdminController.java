@@ -2,54 +2,76 @@ package uz.nonvoyxona.app.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import uz.nonvoyxona.app.model.*;
 import uz.nonvoyxona.app.model.dto.BakerDTO;
-import uz.nonvoyxona.app.repository.UserRepo;
+import uz.nonvoyxona.app.model.dto.BranchDTO;
+import uz.nonvoyxona.app.model.dto.UserDTO;
+import uz.nonvoyxona.app.model.state.UserRole;
 import uz.nonvoyxona.app.service.*;
 
 import java.util.List;
 import java.util.Optional;
 
-import static uz.nonvoyxona.app.model.state.UserRole.ADMIN;
+import static uz.nonvoyxona.app.model.state.UserRole.BRANCH;
 
-@RestController
+@Controller
 @RequestMapping("/admin")
 @RequiredArgsConstructor
 public class AdminController {
 
+    private final SimpMessagingTemplate messagingTemplate;
+
     private final BranchService branchService;
+    private final UserService userService;
     private final ProductService productService;
     private final CourierService courierService;
     private final OrderService orderService;
-    private final UserRepo userRepo;
-
-    // buni alohida qilaman
-    @GetMapping("/get/key")
-    public ResponseEntity<String> getKey(Users user) {
-
-        Optional<Users> optionalUsers = userRepo.findByLogin(user.getLogin());
-        if (optionalUsers.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        } else {
-            Users users = optionalUsers.get();
-            if (!users.getPasswordHash().equals(user.getPasswordHash())) {
-                return ResponseEntity.badRequest().body("Password is incorrect!");
-            } else {
-                if (!users.getUserRole().equals(ADMIN)) {
-                    return ResponseEntity.badRequest().build();
-                } else {
-                    return ResponseEntity.ok(users.getId());
-                }
-            }
-        }
-    }
 
     // TODO:CREATE
-    @PostMapping("/create/branch")
-    public ResponseEntity<Void> createBranch(@RequestBody Branch branch){
+    @MessageMapping("create.branch")
+    @Transactional
+    public void createBranch(@Payload BranchDTO branchDTO){
+        /*
+        *
+        if (headerAccessor.getSessionAttributes() == null || headerAccessor.getSessionAttributes().isEmpty()) {
+            return ResponseEntity.status(403).build();
+        }
+        UserRole userRole = (UserRole) headerAccessor.getSessionAttributes().get("userRole");
+        if (userRole != ADMIN) {
+            return ResponseEntity.status(403).build();
+        }
+        */
+        User user = getUser(branchDTO, BRANCH);
+
+        Branch branch = Branch.builder()
+                .name(branchDTO.getName())
+                .address(branchDTO.getAddress())
+                .user(user)
+                .build();
         branchService.save(branch);
-        return ResponseEntity.ok().build();
+
+        userService.getAllAdminIds().forEach(
+                id -> messagingTemplate.convertAndSend(
+                        "/topic/admin/" + id,
+                        branchService.getAll()
+                )
+        );
+    }
+
+    private <T extends UserDTO> User getUser(T dto, UserRole userRole) {
+        User user = User.builder()
+                .username(dto.getUsername())
+                .password(dto.getPassword())
+                .userRole(userRole)
+                .build();
+        userService.save(user);
+        return user;
     }
 
     @PostMapping("/create/bakery")
@@ -91,7 +113,7 @@ public class AdminController {
     //TODO: Getlar
     @GetMapping("/get/branch")
     public ResponseEntity<List<Branch>> getAllBranchIds() {
-        return ResponseEntity.ok(branchService.findAll());
+        return ResponseEntity.ok(branchService.getAll());
     }
 
     @GetMapping("/get/courier")

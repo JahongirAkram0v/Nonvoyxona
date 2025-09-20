@@ -20,7 +20,7 @@ public class Courier {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private Users user;
+    private User user;
 
     private String phoneNumber;
 
