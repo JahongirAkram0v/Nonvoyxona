@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import uz.nonvoyxona.app.model.Product;
 import uz.nonvoyxona.app.repository.ProductRepo;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -15,6 +16,10 @@ public class ProductService {
 
     public void save(Product product) {
         productRepo.save(product);
+    }
+
+    public List<Product> getAll() {
+        return productRepo.findAll();
     }
 
     public Optional<Product> findById(Integer productId) {

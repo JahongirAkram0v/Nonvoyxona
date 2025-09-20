@@ -5,8 +5,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ProductDTO {
+public class CourierDTO extends UserDTO {
 
     private String name;
-    private int price;
+    private String phoneNumber;
 }

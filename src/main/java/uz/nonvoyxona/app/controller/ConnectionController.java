@@ -28,9 +28,6 @@ public class ConnectionController {
         }
 
         User user = optionalUser.get();
-        if (user.getUserRole() != userDTO.getUserRole()) {
-            return ResponseEntity.badRequest().body("FAILURE: Incorrect role.");
-        }
         if (!user.getPassword().equals(userDTO.getPassword())) {
             return ResponseEntity.badRequest().body("FAILURE: Incorrect password.");
         }

@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity()
+@EqualsAndHashCode(of = "id")
 public class BranchProduct {
 
     @Id

@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @ToString
 @Getter
@@ -19,14 +21,10 @@ public class Product {
     @GeneratedValue
     private Long id;
     private String name;
-
-    private Long price;
+    private int price;
 
     @Builder.Default
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<BranchProduct> branchProducts = new ArrayList<>();
-    @Builder.Default
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Production> productions = new ArrayList<>();
+    private Set<BranchProduct> branchProducts = new HashSet<>();
 
 }

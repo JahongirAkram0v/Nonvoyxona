@@ -2,8 +2,6 @@ package uz.nonvoyxona.app.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -14,7 +12,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 public class Production {
 
     @Id
@@ -24,12 +21,11 @@ public class Production {
     @ManyToOne
     @JoinColumn(name = "baker_id")
     private Baker baker;
-    @ManyToOne
-    @JoinColumn(name = "product_id")
-    private Product product;
 
+    private String name;
+    private int price;
     private int quantity;
-    //togirlashim kerak
-    @CreatedDate
+
+    //togirlashim kerakdir
     private LocalDateTime productionDateTime;
 }

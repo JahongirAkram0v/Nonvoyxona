@@ -17,7 +17,7 @@ public class CourierService {
         courierRepo.save(courier);
     }
 
-    public List<Courier> findAll() {
+    public List<Courier> getAll() {
         return courierRepo.findAll();
     }
 }

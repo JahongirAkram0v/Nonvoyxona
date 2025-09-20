@@ -3,10 +3,7 @@ package uz.nonvoyxona.app.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uz.nonvoyxona.app.model.Baker;
-import uz.nonvoyxona.app.model.Branch;
-import uz.nonvoyxona.app.model.dto.BakerDTO;
 import uz.nonvoyxona.app.repository.BakerRepo;
-import uz.nonvoyxona.app.repository.BranchRepo;
 
 import java.util.List;
 import java.util.Optional;
