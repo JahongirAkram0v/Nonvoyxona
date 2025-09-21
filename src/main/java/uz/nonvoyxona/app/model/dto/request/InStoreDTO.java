@@ -9,6 +9,7 @@ import java.util.List;
 @Setter
 public class InStoreDTO {
 
+    private int branchId;
     private List<ItemDTO> itemDTOList;
     private Long totalPrice;
 }

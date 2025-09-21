@@ -12,7 +12,7 @@ public class SendController {
 
     public <T> void send(T payload, String endpoint) {
         messagingTemplate.convertAndSend(
-                "/topic/" + endpoint,
+                endpoint,
                 payload
         );
     }

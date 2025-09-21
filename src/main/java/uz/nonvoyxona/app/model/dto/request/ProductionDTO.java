@@ -7,6 +7,7 @@ import lombok.Setter;
 @Setter
 public class ProductionDTO {
 
+    private int branchId;
     private Long bakerId;
     private Integer productId;
     private Integer quantity;

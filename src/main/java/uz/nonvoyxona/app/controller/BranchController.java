@@ -1,7 +1,6 @@
 package uz.nonvoyxona.app.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/branch")
+@MessageMapping("/branch")
 @RequiredArgsConstructor
 public class BranchController {
 
@@ -29,12 +28,12 @@ public class BranchController {
     private final BakerService bakerService;
     private final ProductService productService;
 
-    @MessageMapping("create.production")
-    public void createProduction(@Header Integer branchId, @Payload ProductionDTO productionDTO) {
+    @MessageMapping("create/production")
+    public void createProduction(@Payload ProductionDTO productionDTO) {
 
-        Optional<Branch> optionalBranch = branchService.findById(branchId);
+        Optional<Branch> optionalBranch = branchService.findById(productionDTO.getBranchId());
         if (optionalBranch.isEmpty()) {
-            send.send("Branch not found", "/branch/" + branchId + "error/");
+            send.send("Branch not found: " + productionDTO.getBranchId(), "/topic/admin/error/");
             return;
         }
         Branch branch = optionalBranch.get();
@@ -46,7 +45,7 @@ public class BranchController {
         Optional<Product> optionalProduct = productService.findById(productionDTO.getProductId());
 
         if (optionalBaker.isEmpty() || optionalProduct.isEmpty()) {
-            send.send("Baker or Product not found", "/branch/" + branchId + "error/");
+            send.send("Baker or Product not found", "/queue/" + productionDTO.getBranchId() + "/error/");
             return;
         }
 
@@ -79,16 +78,16 @@ public class BranchController {
 
         branch.getBranchProducts().add(branchProduct);
         branchService.save(branch);
-        send.send(baker.getProductions(), "/admin/branch");
-        send.send(baker.getProductions(), "/branch/" + branchId);
+        send.send(baker.getProductions(), "/topic/admin/production");
+        send.send(baker.getProductions(), "/queue/" + productionDTO.getBranchId()+"/production");
     }
 
-    @MessageMapping("create.inStore")
-    public void createInStore(@Header Integer branchId, @Payload InStoreDTO inStoreDTO) {
+    @MessageMapping("create/inStore")
+    public void createInStore(@Payload InStoreDTO inStoreDTO) {
 
-        Optional<Branch> optionalBranch = branchService.findById(branchId);
+        Optional<Branch> optionalBranch = branchService.findById(inStoreDTO.getBranchId());
         if (optionalBranch.isEmpty()) {
-            send.send("Branch not found", "/branch/" + branchId + "error/");
+            send.send("Branch not found: " + inStoreDTO.getBranchId(), "/topic/admin/error/");
             return;
         }
         Branch branch = optionalBranch.get();
@@ -108,7 +107,8 @@ public class BranchController {
         }
 
         if (hasError) {
-            send.send("Some products are not available or insufficient quantity", "/branch/" + branchId + "error/");
+            send.send("Some products are not available or insufficient quantity",
+                    "/queue/" + inStoreDTO.getBranchId() + "/error/");
             return;
         }
 
@@ -128,7 +128,8 @@ public class BranchController {
         }
 
         if (calculatedTotalPrice != inStoreDTO.getTotalPrice()) {
-            send.send("Total price is: " + calculatedTotalPrice, "/branch/" + branchId + "error/");
+            send.send("Total price is: " + calculatedTotalPrice,
+                    "/queue/" + inStoreDTO.getBranchId() + "/error/");
         }
 
         InStore inStore = InStore.builder()
@@ -141,9 +142,9 @@ public class BranchController {
         branchService.save(branch);
 
         //adminga ozgartirib yuborishim kerak
-        send.send(branch.getInStores(), "/admin/branch");
+        send.send(branch.getInStores(), "/topic/admin/branch");
 
-        send.send(branch.getInStores(), "/branch/" + branchId);
+        send.send(branch.getInStores(), "/queue/" + inStoreDTO.getBranchId()+"/inStore");
     }
 
 }

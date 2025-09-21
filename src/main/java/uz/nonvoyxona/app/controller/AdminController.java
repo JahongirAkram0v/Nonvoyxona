@@ -5,7 +5,6 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
 import uz.nonvoyxona.app.model.*;
 import uz.nonvoyxona.app.model.dto.request.*;
 import uz.nonvoyxona.app.model.state.UserRole;
@@ -20,9 +19,13 @@ import static uz.nonvoyxona.app.model.state.UserRole.BRANCH;
 import static uz.nonvoyxona.app.model.state.UserRole.COURIER;
 
 @Controller
-@RequestMapping("/admin")
+@MessageMapping("/admin")
 @RequiredArgsConstructor
 public class AdminController {
+
+    //topic/{role} - userlar uchun
+    //queue/{id} - bitta user uchun
+    //app/ - userdan keladigan
 
     private final SendController send;
 
@@ -32,7 +35,7 @@ public class AdminController {
     private final CourierService courierService;
 
     // TODO:CREATE
-    @MessageMapping("create.branch")
+    @MessageMapping("create/branch")
     @Transactional
     public void createBranch(@Payload BranchDTO branchDTO){
         
@@ -44,11 +47,11 @@ public class AdminController {
                 .user(user)
                 .build();
         branchService.save(branch);
-
-        send.send(branchService.getAll(), "/admin/branch");
+        //branchni adminga qanday yuboras ekan?
+        send.send(branchService.getAll(), "/topic/admin/branch");
     }
 
-    @MessageMapping("create.courier")
+    @MessageMapping("create/courier")
     @Transactional
     public void createCourier(@Payload CourierDTO courierDTO){
 
@@ -61,8 +64,8 @@ public class AdminController {
                 .build();
 
         courierService.save(courier);
-
-        send.send(courierService.getAll(), "admin/courier");
+        //courierni adminga bugungi malumotlar bilan yuboraman
+        send.send(courierService.getAll(), "/topic/admin/courier");
     }
 
     private <T extends UserDTO> User getUser(T dto, UserRole userRole) {
@@ -75,12 +78,12 @@ public class AdminController {
         return user;
     }
 
-    @MessageMapping("create.bakery")
+    @MessageMapping("create/bakery")
     public void createBakery(@Payload BakerDTO bakerDTO){
 
         Optional<Branch> optionalBranch = branchService.findById(bakerDTO.getBranchId());
         if (optionalBranch.isEmpty()){
-            send.send("Branch not found", "/admin/error");
+            send.send("Branch not found", "/topic/admin/error");
         } else {
             Branch branch = optionalBranch.get();
             Baker baker = Baker.builder()
@@ -89,13 +92,13 @@ public class AdminController {
                     .build();
             branch.getBakers().add(baker);
             branchService.save(branch);
-            send.send(branchService.getAll(), "/admin/branch");
-            send.send(branch, "/branch/" + branch.getId());
+            send.send(branchService.getAll(), "/topic/admin/branch");
+            send.send(branch, "queue/" + branch.getId() + "/bakery");
         }
 
     }
 
-    @MessageMapping("create.product")
+    @MessageMapping("create/product")
     public void createProduct(@Payload ProductDTO productDTO){
 
         Product product = Product.builder()
@@ -104,18 +107,18 @@ public class AdminController {
                 .build();
 
         productService.save(product);
-        send.send(productService.getAll(), "admin/product");
-        send.send(productService.getAll(), "/branch");
+        send.send(productService.getAll(), "/topic/admin/product");
+        send.send(productService.getAll(), "/topic/branch/product");
     }
 
     // boshlangich qiymatlarni olish uchun endpointlar yozishim kerak.
 
-    @MessageMapping("create.delivery")
+    @MessageMapping("create/delivery")
     public void createDelivery(@Payload DeliveryDTO deliveryDTO){
 
         Optional<Branch> optionalBranch = branchService.findById(deliveryDTO.getBranchId());
         if (optionalBranch.isEmpty()) {
-            send.send("Branch not found", "/branch/" + deliveryDTO.getBranchId() + "error/");
+            send.send("Branch not found", "/topic/admin/error/");
             return;
         }
         Branch branch = optionalBranch.get();
@@ -135,7 +138,8 @@ public class AdminController {
         }
 
         if (hasError) {
-            send.send("Some products are not available or insufficient quantity", "/branch/" + deliveryDTO.getBranchId() + "error/");
+            send.send("Some products are not available or insufficient quantity",
+                    "/queue/" + deliveryDTO.getBranchId() + "/error/");
             return;
         }
 
@@ -155,7 +159,8 @@ public class AdminController {
         }
 
         if (calculatedTotalPrice != deliveryDTO.getTotalPrice()) {
-            send.send("Total price is: " + calculatedTotalPrice, "/branch/" + deliveryDTO.getBranchId() + "error/");
+            send.send("Total price is: " + calculatedTotalPrice,
+                    "/queue/" + deliveryDTO.getBranchId() + "/error/");
         }
 
         Delivery delivery = Delivery.builder()
@@ -171,9 +176,9 @@ public class AdminController {
         branchService.save(branch);
 
         //adminga ozgartirib yuborishim kerak
-        send.send(branch.getInStores(), "/admin/branch");
+        send.send(branch.getInStores(), "/topic/admin/delivery");
 
-        send.send(branch.getInStores(), "/courier");
-        send.send(branch.getInStores(), "/branch/"+deliveryDTO.getBranchId());
+        send.send(branch.getInStores(), "/topic/courier");
+        send.send(branch.getInStores(), "/queue/" + deliveryDTO.getBranchId() + "/delivery");
     }
 }
