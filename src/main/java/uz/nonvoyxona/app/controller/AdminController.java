@@ -11,6 +11,9 @@ import uz.nonvoyxona.app.model.dto.request.*;
 import uz.nonvoyxona.app.model.state.UserRole;
 import uz.nonvoyxona.app.service.*;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static uz.nonvoyxona.app.model.state.UserRole.BRANCH;
@@ -21,7 +24,7 @@ import static uz.nonvoyxona.app.model.state.UserRole.COURIER;
 @RequiredArgsConstructor
 public class AdminController {
 
-    private SendController send;
+    private final SendController send;
 
     private final BranchService branchService;
     private final UserService userService;
@@ -107,4 +110,70 @@ public class AdminController {
 
     // boshlangich qiymatlarni olish uchun endpointlar yozishim kerak.
 
+    @MessageMapping("create.delivery")
+    public void createDelivery(@Payload DeliveryDTO deliveryDTO){
+
+        Optional<Branch> optionalBranch = branchService.findById(deliveryDTO.getBranchId());
+        if (optionalBranch.isEmpty()) {
+            send.send("Branch not found", "/branch/" + deliveryDTO.getBranchId() + "error/");
+            return;
+        }
+        Branch branch = optionalBranch.get();
+
+        List<DeliveryItem> deliveryItemList = new ArrayList<>();
+        boolean hasError = false;
+        long calculatedTotalPrice = 0L;
+
+        // errorlarni tekshirish
+        for (ItemDTO item: deliveryDTO.getItemDTOList()) {
+            for (BranchProduct bp : branch.getBranchProducts()) {
+                if (bp.getProduct().getId() != item.getProductId() || bp.getQuantity() < item.getQuantity()) {
+                    hasError = true;
+                    break;
+                }
+            }
+        }
+
+        if (hasError) {
+            send.send("Some products are not available or insufficient quantity", "/branch/" + deliveryDTO.getBranchId() + "error/");
+            return;
+        }
+
+        for (ItemDTO item: deliveryDTO.getItemDTOList()) {
+            for (BranchProduct bp : branch.getBranchProducts()) {
+                DeliveryItem deliveryItem = DeliveryItem.builder()
+                        .name(bp.getProduct().getName())
+                        .price(bp.getProduct().getPrice())
+                        .quantity(item.getQuantity())
+                        .build();
+                deliveryItemList.add(deliveryItem);
+
+                bp.setQuantity(bp.getQuantity() - item.getQuantity());
+                branch.getBranchProducts().add(bp);
+                calculatedTotalPrice += (long) bp.getProduct().getPrice() * item.getQuantity();
+            }
+        }
+
+        if (calculatedTotalPrice != deliveryDTO.getTotalPrice()) {
+            send.send("Total price is: " + calculatedTotalPrice, "/branch/" + deliveryDTO.getBranchId() + "error/");
+        }
+
+        Delivery delivery = Delivery.builder()
+                .branch(branch)
+                .deliveryItems(deliveryItemList)
+                .clientName(deliveryDTO.getClientName())
+                .clientPhoneNumber(deliveryDTO.getClientPhoneNumber())
+                .clientAddress(deliveryDTO.getGetClientAddress())
+                .totalPrice(calculatedTotalPrice)
+                .orderDateTime(LocalDateTime.now())
+                .build();
+        branch.getDeliveries().add(delivery);
+        branchService.save(branch);
+
+        //adminga ozgartirib yuborishim kerak
+        send.send(branch.getInStores(), "/admin/branch");
+
+        send.send(branch.getInStores(), "/courier");
+        send.send(branch.getInStores(), "/branch/"+deliveryDTO.getBranchId());
+    }
 }

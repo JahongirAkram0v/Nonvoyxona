@@ -18,7 +18,7 @@ public class BranchService {
         branchRepo.save(branch);
     }
 
-    public Optional<Branch> findById(Integer id) {
+    public Optional<Branch> findById(int id) {
         return branchRepo.findById(id);
     }
 

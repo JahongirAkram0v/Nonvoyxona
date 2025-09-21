@@ -6,12 +6,16 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.web.bind.annotation.*;
 import uz.nonvoyxona.app.model.*;
+import uz.nonvoyxona.app.model.dto.request.InStoreDTO;
+import uz.nonvoyxona.app.model.dto.request.ItemDTO;
 import uz.nonvoyxona.app.model.dto.request.ProductionDTO;
 import uz.nonvoyxona.app.service.BakerService;
 import uz.nonvoyxona.app.service.BranchService;
 import uz.nonvoyxona.app.service.ProductService;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -77,6 +81,69 @@ public class BranchController {
         branchService.save(branch);
         send.send(baker.getProductions(), "/admin/branch");
         send.send(baker.getProductions(), "/branch/" + branchId);
+    }
+
+    @MessageMapping("create.inStore")
+    public void createInStore(@Header Integer branchId, @Payload InStoreDTO inStoreDTO) {
+
+        Optional<Branch> optionalBranch = branchService.findById(branchId);
+        if (optionalBranch.isEmpty()) {
+            send.send("Branch not found", "/branch/" + branchId + "error/");
+            return;
+        }
+        Branch branch = optionalBranch.get();
+
+        List<InStoreItem> inStoreItemList = new ArrayList<>();
+        boolean hasError = false;
+        long calculatedTotalPrice = 0L;
+
+        // errorlarni tekshirish
+        for (ItemDTO item: inStoreDTO.getItemDTOList()) {
+            for (BranchProduct bp : branch.getBranchProducts()) {
+                if (bp.getProduct().getId() != item.getProductId() || bp.getQuantity() < item.getQuantity()) {
+                    hasError = true;
+                    break;
+                }
+            }
+        }
+
+        if (hasError) {
+            send.send("Some products are not available or insufficient quantity", "/branch/" + branchId + "error/");
+            return;
+        }
+
+        for (ItemDTO item: inStoreDTO.getItemDTOList()) {
+            for (BranchProduct bp : branch.getBranchProducts()) {
+                InStoreItem inStoreItem = InStoreItem.builder()
+                        .name(bp.getProduct().getName())
+                        .price(bp.getProduct().getPrice())
+                        .quantity(item.getQuantity())
+                        .build();
+                inStoreItemList.add(inStoreItem);
+
+                bp.setQuantity(bp.getQuantity() - item.getQuantity());
+                branch.getBranchProducts().add(bp);
+                calculatedTotalPrice += (long) bp.getProduct().getPrice() * item.getQuantity();
+            }
+        }
+
+        if (calculatedTotalPrice != inStoreDTO.getTotalPrice()) {
+            send.send("Total price is: " + calculatedTotalPrice, "/branch/" + branchId + "error/");
+        }
+
+        InStore inStore = InStore.builder()
+                .branch(branch)
+                .orderDateTime(LocalDateTime.now())
+                .inStoreItems(inStoreItemList)
+                .totalPrice(calculatedTotalPrice)
+                .build();
+        branch.getInStores().add(inStore);
+        branchService.save(branch);
+
+        //adminga ozgartirib yuborishim kerak
+        send.send(branch.getInStores(), "/admin/branch");
+
+        send.send(branch.getInStores(), "/branch/" + branchId);
     }
 
 }
