@@ -44,6 +44,6 @@ public class Branch {
     @Builder.Default
     @OneToMany(mappedBy = "branch", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderColumn(name = "in_store_index")
-    private List<Delivery> deliveries = new ArrayList<>();
+    private Set<Delivery> deliveries = new HashSet<>();
 
 }

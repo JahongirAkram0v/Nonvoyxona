@@ -21,7 +21,7 @@ public class Delivery {
 
     @Id
     @GeneratedValue
-    private Long id;
+    private int id;
 
     @ManyToOne
     @JoinColumn(name = "courier_id")

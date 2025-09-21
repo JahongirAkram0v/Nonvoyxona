@@ -5,7 +5,9 @@ import lombok.*;
 import uz.nonvoyxona.app.model.state.CourierState;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @ToString
 @Getter
@@ -14,6 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@EqualsAndHashCode(of = "id")
 public class Courier {
 
     @Id
@@ -34,5 +37,5 @@ public class Courier {
     @Builder.Default
     @OneToMany(mappedBy = "courier", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderColumn(name = "delivery_index")
-    private List<Delivery> deliveries = new ArrayList<>();
+    private Set<Delivery> deliveries = new HashSet<>();
 }
