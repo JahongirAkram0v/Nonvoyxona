@@ -10,7 +10,4 @@ import java.util.Optional;
 public interface UserRepo extends JpaRepository<User, String> {
 
     Optional<User> findByUsername(String username);
-
-    @Query("SELECT u.id FROM User u WHERE u.role = 'ADMIN'")
-    List<String> getAllAdminIds();
 }

@@ -36,5 +36,14 @@ public class Branch {
     @OrderColumn(name = "baker_index")
     private List<Baker> bakers = new ArrayList<>();
 
-    //In-store sale ni qoshishim kerak
+    @Builder.Default
+    @OneToMany(mappedBy = "branch", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderColumn(name = "in_store_index")
+    private List<InStore> inStores = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "branch", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderColumn(name = "in_store_index")
+    private List<Delivery> deliveries = new ArrayList<>();
+
 }

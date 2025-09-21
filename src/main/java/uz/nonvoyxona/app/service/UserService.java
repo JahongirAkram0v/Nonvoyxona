@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import uz.nonvoyxona.app.model.User;
 import uz.nonvoyxona.app.repository.UserRepo;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -24,9 +23,5 @@ public class UserService {
 
     public void save(User user) {
         userRepo.save(user);
-    }
-
-    public List<String> getAllAdminIds() {
-        return userRepo.getAllAdminIds();
     }
 }

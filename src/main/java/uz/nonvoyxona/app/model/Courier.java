@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import uz.nonvoyxona.app.model.state.CourierState;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @ToString
 @Getter
 @Setter
@@ -27,4 +30,9 @@ public class Courier {
     @Builder.Default
     @Enumerated(EnumType.STRING)
     private CourierState courierState = CourierState.OFFLINE;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "courier", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderColumn(name = "delivery_index")
+    private List<Delivery> deliveries = new ArrayList<>();
 }

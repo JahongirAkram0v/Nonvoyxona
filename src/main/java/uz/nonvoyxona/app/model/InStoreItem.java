@@ -9,20 +9,18 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity()
-public class OrderItem1 {
+@Entity
+public class InStoreItem {
 
     @Id
     @GeneratedValue
-    private int id;
+    private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "order_id")
-    private Order1 order1;
+    @JoinColumn(name = "in_store_id")
+    private InStore inStore;
 
-    @ManyToOne
-    @JoinColumn(name = "branchProduct_id")
-    private BranchProduct branchProduct;
-
+    private String name;
+    private int price;
     private int quantity;
 }
