@@ -21,7 +21,7 @@ public class Courier {
 
     @Id
     @GeneratedValue
-    private Long id;
+    private int id;
     private String name;
 
     @OneToOne(cascade = CascadeType.ALL)

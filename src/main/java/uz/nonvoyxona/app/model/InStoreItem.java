@@ -14,7 +14,7 @@ public class InStoreItem {
 
     @Id
     @GeneratedValue
-    private Long id;
+    private int id;
 
     @ManyToOne
     @JoinColumn(name = "in_store_id")

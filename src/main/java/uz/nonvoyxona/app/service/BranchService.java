@@ -26,17 +26,4 @@ public class BranchService {
         return branchRepo.findAll();
     }
 
-    public List<Branch> findAllWithBranchProducts() {
-        return branchRepo.findAllWithBranchProducts();
-    }
-
-    public List<Branch> findAllWithBakers() {
-        return branchRepo.findAllWithBakers();
-    }
-
-    public List<Branch> findAllWithBranchProductsAndBakers() {
-        return branchRepo.findAllWithBranchProductsAndBakers();
-    }
-
-
 }

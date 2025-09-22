@@ -9,10 +9,9 @@ import uz.nonvoyxona.app.model.dto.request.DeliveryUpdateDTO;
 import uz.nonvoyxona.app.model.dto.request.InStoreDTO;
 import uz.nonvoyxona.app.model.dto.request.ItemDTO;
 import uz.nonvoyxona.app.model.dto.request.ProductionDTO;
+import uz.nonvoyxona.app.model.dto.response.*;
 import uz.nonvoyxona.app.model.state.DeliveryStatus;
-import uz.nonvoyxona.app.service.BakerService;
-import uz.nonvoyxona.app.service.BranchService;
-import uz.nonvoyxona.app.service.ProductService;
+import uz.nonvoyxona.app.service.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -31,6 +30,139 @@ public class BranchController {
     private final BranchService branchService;
     private final BakerService bakerService;
     private final ProductService productService;
+    private final ProductionService productionService;
+    private final BranchProductService branchProductService;
+    private final InStoreService inStoreService;
+    private final DeliveryService deliveryService;
+
+    //branchni hisobotdan tashqari hal qilaman.
+
+    /// websocket uchun get methodlar yozaman.
+    @MessageMapping("get/product")
+    public void getProduct(@Payload int branchId) {
+
+        List<NameDto> nameDtoList = productService.getAll().stream()
+                .map(product -> {
+                    NameDto nameDTO = new NameDto();
+                    nameDTO.setId(product.getId());
+                    nameDTO.setName(product.getName());
+                    return nameDTO;
+                })
+                .toList();
+
+        send.send(nameDtoList,"/queue/"+branchId+"/product");
+    } //tugadi
+
+    @MessageMapping("get/baker")
+    public void getBaker(@Payload int branchId) {
+
+        List<NameDto> nameDtoList = bakerService.findAllByBranchId(branchId)
+                .stream()
+                .map(product -> {
+                    NameDto nameDTO = new NameDto();
+                    nameDTO.setId(product.getId());
+                    nameDTO.setName(product.getName());
+                    return nameDTO;
+                })
+                .toList();
+
+        send.send(nameDtoList,"/queue/"+branchId+"/baker");
+    } //tugadi
+
+    @MessageMapping("get/production")
+    public void getProduction(@Payload int branchId) {
+
+        List<ProductionDto> productionDtoList = productionService.findAllByBranchIdToday(branchId)
+                .stream()
+                .map(product -> {
+                    ProductionDto productionDto = new ProductionDto();
+                    productionDto.setId(product.getId());
+                    productionDto.setBakerName(product.getBaker().getName());
+                    productionDto.setProductName(product.getName());
+                    productionDto.setQuantity(product.getQuantity());
+                    productionDto.setProductionDateTime(product.getProductionDateTime());
+                    return productionDto;
+                })
+                .toList();
+        send.send(productionDtoList,"/queue/"+branchId+"/production");
+    } //tugadi
+
+    @MessageMapping("get/branchProduct")
+    public void getBranchProduct(@Payload int branchId) {
+
+        List<BranchProductDto> branchProductDtoList = branchProductService.findAllByBranchId(branchId)
+                .stream()
+                .map(bp -> {
+                    BranchProductDto dto = new BranchProductDto();
+                    dto.setId(bp.getId());
+                    dto.setProductName(bp.getProduct().getName());
+                    dto.setQuantity(bp.getQuantity());
+                    return dto;
+                })
+                .toList();
+
+        send.send(branchProductDtoList, "/queue/"+branchId+"/branchProduct");
+    } //tugadi
+
+    @MessageMapping("get/inStore")
+    public void getInStore(@Payload int branchId) {
+
+        List<InStoreDto> inStoreDtoList = inStoreService.findAllByBranchIdToday(branchId)
+                .stream()
+                .map(inStore -> {
+                    InStoreDto dto = new InStoreDto();
+                    dto.setId(inStore.getId());
+                    dto.setTotalPrice(inStore.getTotalPrice());
+                    List<ItemDto> itemDtoList = inStore.getInStoreItems()
+                            .stream()
+                            .map(item -> {
+                                ItemDto itemDto = new ItemDto();
+                                itemDto.setId(item.getId());
+                                itemDto.setName(item.getName());
+                                itemDto.setPrice(item.getPrice());
+                                itemDto.setQuantity(item.getQuantity());
+                                return itemDto;
+                            })
+                            .toList();
+                    dto.setInStoreItems(itemDtoList);
+                    return dto;
+                })
+                .toList();
+        send.send(inStoreDtoList, "/queue/"+branchId+"/inStore");
+    } //tugadi
+
+    @MessageMapping("get/delivery")
+    public void getDelivery(@Payload int branchId) {
+
+        List<DeliveryDto> inStoreDtoList = deliveryService.findAllByBranchIdAndCourierIsNull(branchId)
+                .stream()
+                .map(delivery -> {
+                    DeliveryDto dto = new DeliveryDto();
+                    dto.setId(delivery.getId());
+                    dto.setClientName(delivery.getClientName());
+                    dto.setClientPhoneNumber(delivery.getClientPhoneNumber());
+                    dto.setClientAddress(delivery.getClientAddress());
+                    dto.setTotalPrice(delivery.getTotalPrice());
+                    List<ItemDto> itemDtoList = delivery.getDeliveryItems()
+                            .stream()
+                            .map(item -> {
+                                ItemDto itemDto = new ItemDto();
+                                itemDto.setId(item.getId());
+                                itemDto.setName(item.getName());
+                                itemDto.setPrice(item.getPrice());
+                                itemDto.setQuantity(item.getQuantity());
+                                return itemDto;
+                            })
+                            .toList();
+                    dto.setInStoreItems(itemDtoList);
+                    return dto;
+                })
+                .toList();
+        send.send(inStoreDtoList, "/queue/"+branchId+"/delivery");
+    } //tugadi
+
+    //hisobotni keyin oylab koraman.
+
 
     @MessageMapping("create/production")
     public void createProduction(@Payload ProductionDTO productionDTO) {
@@ -43,7 +175,7 @@ public class BranchController {
         Branch branch = optionalBranch.get();
 
         Optional<Baker> optionalBaker = branch.getBakers().stream()
-                .filter(baker -> baker.getId().equals(productionDTO.getBakerId()))
+                .filter(baker -> baker.getId() == productionDTO.getBakerId())
                 .findAny();
 
         Optional<Product> optionalProduct = productService.findById(productionDTO.getProductId());
@@ -59,7 +191,6 @@ public class BranchController {
         Production production = Production.builder()
                 .baker(baker)
                 .name(product.getName())
-                .price(product.getPrice())
                 .quantity(productionDTO.getQuantity())
                 .productionDateTime(LocalDateTime.now())
                 .build();
@@ -69,7 +200,7 @@ public class BranchController {
         /// ///
 
         BranchProduct branchProduct = branch.getBranchProducts().stream()
-                .filter(bp -> bp.getProduct().getId().equals(product.getId()))
+                .filter(bp -> bp.getProduct().getId() == product.getId())
                 .findAny()
                 .orElseGet(() -> {
                     BranchProduct newBranchProduct = new BranchProduct();

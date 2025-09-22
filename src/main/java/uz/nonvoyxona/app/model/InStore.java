@@ -18,7 +18,7 @@ public class InStore {
 
     @Id
     @GeneratedValue
-    private Long id;
+    private int id;
 
     @ManyToOne
     @JoinColumn(name = "branch_id")

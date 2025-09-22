@@ -17,7 +17,7 @@ public class BranchProduct {
 
     @Id
     @GeneratedValue
-    private Long id;
+    private int id;
 
     @ManyToOne
     private Branch branch;

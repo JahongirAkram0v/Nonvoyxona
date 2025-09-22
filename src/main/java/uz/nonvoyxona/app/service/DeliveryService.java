@@ -26,4 +26,7 @@ public class DeliveryService {
         return deliveryRepo.findAll();
     }
 
+    public List<Delivery> findAllByBranchIdAndCourierIsNull(int branchId) {
+        return deliveryRepo.findAllByBranchIdAndCourierIsNull(branchId);
+    }
 }

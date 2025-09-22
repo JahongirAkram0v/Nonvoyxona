@@ -1,5 +1,6 @@
 package uz.nonvoyxona.app.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,16 +17,19 @@ public class Production {
 
     @Id
     @GeneratedValue
-    private Long id;
+    private int id;
+
+    @ManyToOne
+    @JoinColumn(name = "branch_id")
+    private Branch branch;
 
     @ManyToOne
     @JoinColumn(name = "baker_id")
     private Baker baker;
 
     private String name;
-    private int price;
     private int quantity;
 
-    //togirlashim kerakdir
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime productionDateTime;
 }

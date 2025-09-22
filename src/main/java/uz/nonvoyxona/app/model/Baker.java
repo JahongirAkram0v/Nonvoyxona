@@ -16,7 +16,7 @@ public class Baker {
 
     @Id
     @GeneratedValue
-    private Long id;
+    private int id;
     private String name;
 
     @ManyToOne
