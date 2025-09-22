@@ -7,6 +7,6 @@ import lombok.Setter;
 @Setter
 public class DeliveryUpdateDTO {
 
-    private int courierId;
+    private int Id;
     private int deliveryId;
 }
