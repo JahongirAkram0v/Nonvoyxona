@@ -1,8 +1,8 @@
 package uz.nonvoyxona.app.model.dto.response;
 
-import lombok.Setter;
+import lombok.AllArgsConstructor;
 
-@Setter
+@AllArgsConstructor
 public class NameDto {
 
     private int id;

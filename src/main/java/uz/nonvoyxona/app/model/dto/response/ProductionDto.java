@@ -1,10 +1,10 @@
 package uz.nonvoyxona.app.model.dto.response;
 
-import lombok.Setter;
+import lombok.Builder;
 
 import java.time.LocalDateTime;
 
-@Setter
+@Builder
 public class ProductionDto {
 
     private int id;

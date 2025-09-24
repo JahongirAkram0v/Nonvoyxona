@@ -9,7 +9,6 @@ import uz.nonvoyxona.app.model.dto.request.DeliveryUpdateDTO;
 import uz.nonvoyxona.app.model.dto.request.InStoreDTO;
 import uz.nonvoyxona.app.model.dto.request.ItemDTO;
 import uz.nonvoyxona.app.model.dto.request.ProductionDTO;
-import uz.nonvoyxona.app.model.dto.response.*;
 import uz.nonvoyxona.app.model.state.DeliveryStatus;
 import uz.nonvoyxona.app.service.*;
 
@@ -37,128 +36,46 @@ public class BranchController {
 
     //branchni hisobotdan tashqari hal qilaman.
 
-    /// websocket uchun get methodlar yozaman.
     @MessageMapping("get/product")
     public void getProduct(@Payload int branchId) {
 
-        List<NameDto> nameDtoList = productService.getAll().stream()
-                .map(product -> {
-                    NameDto nameDTO = new NameDto();
-                    nameDTO.setId(product.getId());
-                    nameDTO.setName(product.getName());
-                    return nameDTO;
-                })
-                .toList();
-
-        send.send(nameDtoList,"/queue/"+branchId+"/product");
+        send.send(productService.getAllDto(),
+                "/queue/"+branchId+"/product");
     } //tugadi
 
     @MessageMapping("get/baker")
     public void getBaker(@Payload int branchId) {
 
-        List<NameDto> nameDtoList = bakerService.findAllByBranchId(branchId)
-                .stream()
-                .map(product -> {
-                    NameDto nameDTO = new NameDto();
-                    nameDTO.setId(product.getId());
-                    nameDTO.setName(product.getName());
-                    return nameDTO;
-                })
-                .toList();
-
-        send.send(nameDtoList,"/queue/"+branchId+"/baker");
+        send.send(bakerService.findAllByBranchIdDto(branchId),
+                "/queue/"+branchId+"/baker");
     } //tugadi
 
     @MessageMapping("get/production")
     public void getProduction(@Payload int branchId) {
 
-        List<ProductionDto> productionDtoList = productionService.findAllByBranchIdToday(branchId)
-                .stream()
-                .map(product -> {
-                    ProductionDto productionDto = new ProductionDto();
-                    productionDto.setId(product.getId());
-                    productionDto.setBakerName(product.getBaker().getName());
-                    productionDto.setProductName(product.getName());
-                    productionDto.setQuantity(product.getQuantity());
-                    productionDto.setProductionDateTime(product.getProductionDateTime());
-                    return productionDto;
-                })
-                .toList();
-        send.send(productionDtoList,"/queue/"+branchId+"/production");
+        send.send(productionService.findAllByBranchIdTodayDto(branchId),
+                "/queue/"+branchId+"/production");
     } //tugadi
 
     @MessageMapping("get/branchProduct")
     public void getBranchProduct(@Payload int branchId) {
 
-        List<BranchProductDto> branchProductDtoList = branchProductService.findAllByBranchId(branchId)
-                .stream()
-                .map(bp -> {
-                    BranchProductDto dto = new BranchProductDto();
-                    dto.setId(bp.getId());
-                    dto.setProductName(bp.getProduct().getName());
-                    dto.setQuantity(bp.getQuantity());
-                    return dto;
-                })
-                .toList();
-
-        send.send(branchProductDtoList, "/queue/"+branchId+"/branchProduct");
+        send.send(branchProductService.findAllByBranchIdDto(branchId),
+                "/queue/"+branchId+"/branchProduct");
     } //tugadi
 
     @MessageMapping("get/inStore")
     public void getInStore(@Payload int branchId) {
 
-        List<InStoreDto> inStoreDtoList = inStoreService.findAllByBranchIdToday(branchId)
-                .stream()
-                .map(inStore -> {
-                    InStoreDto dto = new InStoreDto();
-                    dto.setId(inStore.getId());
-                    dto.setTotalPrice(inStore.getTotalPrice());
-                    List<ItemDto> itemDtoList = inStore.getInStoreItems()
-                            .stream()
-                            .map(item -> {
-                                ItemDto itemDto = new ItemDto();
-                                itemDto.setId(item.getId());
-                                itemDto.setName(item.getName());
-                                itemDto.setPrice(item.getPrice());
-                                itemDto.setQuantity(item.getQuantity());
-                                return itemDto;
-                            })
-                            .toList();
-                    dto.setInStoreItems(itemDtoList);
-                    return dto;
-                })
-                .toList();
-        send.send(inStoreDtoList, "/queue/"+branchId+"/inStore");
+        send.send(inStoreService.findAllByBranchIdTodayDto(branchId),
+                "/queue/"+branchId+"/inStore");
     } //tugadi
 
     @MessageMapping("get/delivery")
     public void getDelivery(@Payload int branchId) {
 
-        List<DeliveryDto> inStoreDtoList = deliveryService.findAllByBranchIdAndCourierIsNull(branchId)
-                .stream()
-                .map(delivery -> {
-                    DeliveryDto dto = new DeliveryDto();
-                    dto.setId(delivery.getId());
-                    dto.setClientName(delivery.getClientName());
-                    dto.setClientPhoneNumber(delivery.getClientPhoneNumber());
-                    dto.setClientAddress(delivery.getClientAddress());
-                    dto.setTotalPrice(delivery.getTotalPrice());
-                    List<ItemDto> itemDtoList = delivery.getDeliveryItems()
-                            .stream()
-                            .map(item -> {
-                                ItemDto itemDto = new ItemDto();
-                                itemDto.setId(item.getId());
-                                itemDto.setName(item.getName());
-                                itemDto.setPrice(item.getPrice());
-                                itemDto.setQuantity(item.getQuantity());
-                                return itemDto;
-                            })
-                            .toList();
-                    dto.setInStoreItems(itemDtoList);
-                    return dto;
-                })
-                .toList();
-        send.send(inStoreDtoList, "/queue/"+branchId+"/delivery");
+        send.send(deliveryService.findAllByBranchIdAndCourierIsNullDto(branchId),
+                "/queue/"+branchId+"/delivery");
     } //tugadi
 
     //hisobotni keyin oylab koraman.
@@ -169,7 +86,7 @@ public class BranchController {
 
         Optional<Branch> optionalBranch = branchService.findById(productionDTO.getBranchId());
         if (optionalBranch.isEmpty()) {
-            send.send("Branch not found: " + productionDTO.getBranchId(), "/topic/admin/error/");
+            send.send("Branch not found", "/queue/" + productionDTO.getBranchId() + "/error/");
             return;
         }
         Branch branch = optionalBranch.get();
@@ -203,9 +120,10 @@ public class BranchController {
                 .filter(bp -> bp.getProduct().getId() == product.getId())
                 .findAny()
                 .orElseGet(() -> {
-                    BranchProduct newBranchProduct = new BranchProduct();
-                    newBranchProduct.setBranch(branch);
-                    newBranchProduct.setProduct(product);
+                    BranchProduct newBranchProduct = BranchProduct.builder()
+                            .branch(branch)
+                            .product(product)
+                            .build();
                     branch.getBranchProducts().add(newBranchProduct);
                     return newBranchProduct;
                 });
@@ -213,8 +131,12 @@ public class BranchController {
 
         branch.getBranchProducts().add(branchProduct);
         branchService.save(branch);
+
+        //adminga qanday yuboraman
         send.send(baker.getProductions(), "/topic/admin/production");
-        send.send(baker.getProductions(), "/queue/" + productionDTO.getBranchId()+"/production");
+        //branchga
+        send.send(productionService.findAllByBranchIdTodayDto(branch.getId()),
+                "/queue/"+branch.getId()+"/production");
     }
 
     @MessageMapping("create/inStore")
