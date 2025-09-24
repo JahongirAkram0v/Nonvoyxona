@@ -80,7 +80,6 @@ public class BranchController {
 
     //hisobotni keyin oylab koraman.
 
-
     @MessageMapping("create/production")
     public void createProduction(@Payload ProductionDTO productionDTO) {
 
@@ -132,7 +131,7 @@ public class BranchController {
         branch.getBranchProducts().add(branchProduct);
         branchService.save(branch);
 
-        //adminga qanday yuboraman
+        //adminga qanday yuboraman, buni oylab korishim kerak
         send.send(baker.getProductions(), "/topic/admin/production");
         //branchga
         send.send(productionService.findAllByBranchIdTodayDto(branch.getId()),
@@ -153,8 +152,8 @@ public class BranchController {
         boolean hasError = false;
         long calculatedTotalPrice = 0L;
 
-        // errorlarni tekshirish
         for (ItemDTO item: inStoreDTO.getItemDTOList()) {
+            if (hasError) break;
             for (BranchProduct bp : branch.getBranchProducts()) {
                 if (bp.getProduct().getId() != item.getProductId() || bp.getQuantity() < item.getQuantity()) {
                     hasError = true;
@@ -201,7 +200,8 @@ public class BranchController {
         //adminga ozgartirib yuborishim kerak
         send.send(branch.getInStores(), "/topic/admin/branch");
 
-        send.send(branch.getInStores(), "/queue/" + inStoreDTO.getBranchId()+"/inStore");
+        send.send(inStoreService.findAllByBranchIdTodayDto(branch.getId()),
+                "/queue/"+branch.getId()+"/inStore");
     }
 
     //update delivery qilishim kerak
@@ -235,8 +235,11 @@ public class BranchController {
         branch.getDeliveries().add(delivery);
         branchService.save(branch);
 
+        //adminga qanday xabar yuboraman?
         send.send(branch.getDeliveries(),    "/topic/admin/delivery");
-        send.send(branch.getDeliveries(), "/queue/" + deliveryUpdateDTO.getId() + "/delivery");
+
+        send.send(deliveryService.findAllByBranchIdAndCourierIsNullDto(branch.getId()),
+                "/queue/"+branch.getId()+"/delivery");
     }
 
 }
