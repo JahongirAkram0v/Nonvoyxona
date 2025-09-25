@@ -1,6 +1,5 @@
 package uz.nonvoyxona.app.service;
 
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uz.nonvoyxona.app.model.Delivery;
@@ -29,12 +28,39 @@ public class DeliveryService {
         return deliveryRepo.findAll();
     }
 
-    public List<Delivery> findAllByBranchIdAndCourierIsNull(int branchId) {
-        return deliveryRepo.findAllByBranchIdAndCourierIsNull(branchId);
+    public List<Delivery> findAllByBranchIdForBranch(int branchId) {
+        return deliveryRepo.findAllByBranchIdForBranch(branchId);
     }
 
-    public List<DeliveryDto> findAllByBranchIdAndCourierIsNullDto(int branchId) {
-        return findAllByBranchIdAndCourierIsNull(branchId)
+    public List<Delivery> findAllByBranchIdForCourier(int branchId) {
+        return deliveryRepo.findAllByBranchIdForCourier(branchId);
+    }
+
+    public List<DeliveryDto> findAllByBranchIdForBranchDto(int branchId) {
+        return findAllByBranchIdForBranch(branchId)
+                .stream()
+                .map(d -> {
+                    List<ItemDto> itemDtoList = d.getDeliveryItems()
+                            .stream()
+                            .map(i -> {
+                                return new ItemDto(i.getId(), i.getName(), i.getPrice(), i.getQuantity());
+                            })
+                            .toList();
+                    DeliveryDto dto = new DeliveryDto();
+                    dto.setId(d.getId());
+                    dto.setCourierName(d.getCourier().getName());
+                    dto.setClientName(d.getClientName());
+                    dto.setClientPhoneNumber(d.getClientPhoneNumber());
+                    dto.setClientAddress(d.getClientAddress());
+                    dto.setInStoreItems(itemDtoList);
+                    dto.setTotalPrice(d.getTotalPrice());
+                    return dto;
+                })
+                .toList();
+    }
+
+    public List<DeliveryDto> findAllByBranchIdForCourierDto(int courierId) {
+        return findAllByBranchIdForCourier(courierId)
                 .stream()
                 .map(d -> {
                     List<ItemDto> itemDtoList = d.getDeliveryItems()
@@ -46,6 +72,27 @@ public class DeliveryService {
                     DeliveryDto dto = new DeliveryDto();
                     dto.setId(d.getId());
                     dto.setClientName(d.getClientName());
+                    dto.setClientPhoneNumber(d.getClientPhoneNumber());
+                    dto.setClientAddress(d.getClientAddress());
+                    dto.setInStoreItems(itemDtoList);
+                    dto.setTotalPrice(d.getTotalPrice());
+                    return dto;
+                })
+                .toList();
+    }
+
+    public List<DeliveryDto> findAllByBranchIdForMyCourierDtoToday(int courierId) {
+        return deliveryRepo.findAllByBranchIdForMyCourierDtoToday(courierId)
+                .stream()
+                .map(d -> {
+                    List<ItemDto> itemDtoList = d.getDeliveryItems()
+                            .stream()
+                            .map(i -> {
+                                return new ItemDto(i.getId(), i.getName(), i.getPrice(), i.getQuantity());
+                            })
+                            .toList();
+                    DeliveryDto dto = new DeliveryDto();
+                    dto.setId(d.getId());
                     dto.setClientPhoneNumber(d.getClientPhoneNumber());
                     dto.setClientAddress(d.getClientAddress());
                     dto.setInStoreItems(itemDtoList);

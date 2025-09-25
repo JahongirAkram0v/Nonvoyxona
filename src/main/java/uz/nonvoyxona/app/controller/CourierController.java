@@ -22,6 +22,18 @@ public class CourierController {
     private final SendController send;
     private final DeliveryService deliveryService;
 
+    @MessageMapping("/get/delivery")
+    public void getDelivery(@Payload int courierId) {
+        send.send(deliveryService.findAllByBranchIdForCourierDto(courierId),
+                "/queue/"+courierId+"/delivery");
+    }
+
+    @MessageMapping("/get/myDelivery")
+    public void getMyDelivery(@Payload int courierId) {
+        send.send(deliveryService.findAllByBranchIdForMyCourierDtoToday(courierId),
+                "/queue/"+courierId+"/MyDelivery");
+    }
+
     @MessageMapping("update/delivery")
     public void updateDeliveryStatus(@Payload DeliveryUpdateDTO deliveryUpdateDTO) {
 
@@ -37,16 +49,18 @@ public class CourierController {
             return;
         }
         Delivery delivery = optionalDelivery.get();
-        if (delivery.getCourier() != null) {
-            send.send("Delivery already assigned",
-                    "/queue/" + deliveryUpdateDTO.getId() + "/error");
-            return;
-        } else {
+
+        if (delivery.getCourier() == null){
             delivery.setCourier(courier);
             courier.getDeliveries().add(delivery);
             courierService.save(courier);
         }
 
+        if (delivery.getCourier().getId() != courier.getId()) {
+            send.send("Delivery already assigned",
+                    "/queue/" + deliveryUpdateDTO.getId() + "/error");
+            return;
+        }
 
         switch (delivery.getDeliveryStatus()) {
             case READY -> {
@@ -64,6 +78,14 @@ public class CourierController {
         }
 
         // hammaga yuborishim kerak
+        send.send(deliveryService.findAllByBranchIdForBranchDto(delivery.getBranch().getId()),
+                "/queue/"+delivery.getBranch().getId()+"/delivery");
+
+        send.send(deliveryService.findAllByBranchIdForCourierDto(courier.getId()),
+                "/queue/"+courier.getId()+"/delivery");
+
+        send.send(deliveryService.findAllByBranchIdForMyCourierDtoToday(courier.getId()),
+                "/queue/"+courier.getId()+"/myDelivery");
 
     }
 }

@@ -74,7 +74,7 @@ public class BranchController {
     @MessageMapping("get/delivery")
     public void getDelivery(@Payload int branchId) {
 
-        send.send(deliveryService.findAllByBranchIdAndCourierIsNullDto(branchId),
+        send.send(deliveryService.findAllByBranchIdForBranchDto(branchId),
                 "/queue/"+branchId+"/delivery");
     } //tugadi
 
@@ -143,7 +143,7 @@ public class BranchController {
 
         Optional<Branch> optionalBranch = branchService.findById(inStoreDTO.getBranchId());
         if (optionalBranch.isEmpty()) {
-            send.send("Branch not found: " + inStoreDTO.getBranchId(), "/topic/admin/error/");
+            send.send("Branch not found", "/queue/" + inStoreDTO.getBranchId() + "/error/");
             return;
         }
         Branch branch = optionalBranch.get();
@@ -209,7 +209,7 @@ public class BranchController {
     public void updateDelivery(@Payload DeliveryUpdateDTO deliveryUpdateDTO) {
         Optional<Branch> optionalBranch = branchService.findById(deliveryUpdateDTO.getId());
         if (optionalBranch.isEmpty()) {
-            send.send("Branch not found: " + deliveryUpdateDTO.getId(), "/topic/admin/error/");
+            send.send("Branch not found", "/queue/" + deliveryUpdateDTO.getId() + "/error/");
             return;
         }
 
@@ -228,7 +228,7 @@ public class BranchController {
 
         if (currentStatus == CREATED) {
             delivery.setDeliveryStatus(PREPARED);
-        } else {
+        } else if (currentStatus == PREPARED) {
             delivery.setDeliveryStatus(READY);
         }
 
@@ -238,8 +238,11 @@ public class BranchController {
         //adminga qanday xabar yuboraman?
         send.send(branch.getDeliveries(),    "/topic/admin/delivery");
 
-        send.send(deliveryService.findAllByBranchIdAndCourierIsNullDto(branch.getId()),
+        send.send(deliveryService.findAllByBranchIdForBranchDto(branch.getId()),
                 "/queue/"+branch.getId()+"/delivery");
+
+        send.send(deliveryService.findAllByBranchIdForCourierDto(delivery.getCourier().getId()),
+                "/queue/"+delivery.getCourier().getId()+"/delivery");
     }
 
 }
